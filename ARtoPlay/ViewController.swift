@@ -5,26 +5,40 @@
 //  Created by admin on 2018. 6. 29..
 //  Copyright © 2018년 wndzlf. All rights reserved.
 //
-
 import UIKit
 import ARKit
+import SceneKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, ARSCNViewDelegate {
 
     let arview: ARSCNView = {
        let view = ARSCNView()
+        let scene = SCNScene()
        view.translatesAutoresizingMaskIntoConstraints = false
+       view.scene = scene
        return view
     }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        arview.delegate = self
         
-        let scene = SCNScene()
-        arview.scene = scene
+        let text = SCNText(string: "조중현입니다.", extrusionDepth: 1)
+        let material = SCNMaterial()
+        material.diffuse.contents = UIColor.yellow
+        text.materials = [material]
+        
+        let node = SCNNode()
+        node.position = SCNVector3(0,0.02,-0.1)
+        node.scale = SCNVector3(0.01,0.01,0.01)
+        node.geometry = text
+        arview.scene.rootNode.addChildNode(node)
+        arview.automaticallyUpdatesLighting = true
         
         view.addSubview(arview)
+        arview.showsStatistics = true
+        
         
         arview.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         arview.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
@@ -36,8 +50,14 @@ class ViewController: UIViewController {
         let configuration = ARWorldTrackingConfiguration()
         
         arview.session.run(configuration)
-        
-        addObject()
+        //addObject()
+    }
+    override func viewWillDisappear(_ animated: Bool) {
+        arview.session.pause()
+    }
+    func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
+        let node = SCNNode()
+        return node
     }
     
     func addObject() {
